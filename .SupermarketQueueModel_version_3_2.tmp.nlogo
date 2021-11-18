@@ -1950,11 +1950,11 @@ to customer-reneging-strategy4
   ]
 end
 
-to customer-balking [balking-strategy]
- if (balking-strategy = 1) [customer-balking-strategy1]
-;  if (balking-strategy = 2) [customer-balking-strategy2]
-;  if (balking-strategy = 3) [customer-balking-strategy3]
-;  if (balking-strategy = 4) [customer-balking-strategy4]
+to customer-balking [balkin-strategy]
+ if (reneging-strategy = 1) [customer-reneging-strategy1]
+;  if (reneging-strategy = 2) [customer-reneging-strategy2]
+;  if (reneging-strategy = 3) [customer-reneging-strategy3]
+;  if (reneging-strategy = 4) [customer-reneging-strategy4]
 end
 
 to customer-balking-strategy1

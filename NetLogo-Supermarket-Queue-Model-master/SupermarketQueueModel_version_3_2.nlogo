@@ -344,10 +344,15 @@ end
       ][
         ifelse (
 
+
+
           ( who mod 2) != 0 )[
         setxy (backoffice-width - ( who * distance-server-server / 2 ) ) server-ycor][
         setxy (backoffice-width - ( who * distance-server-server / 2 ) ) ( server-ycor + distance-server-server )]
       ]
+
+
+
 
 
 ;      ifelse ( who < max-in-row) [
@@ -410,6 +415,8 @@ to setup-randomes
    rngs:set-seed 7 (experiment * 13)
    rngs:set-seed 8 (experiment * 14)
    rngs:set-seed 9 (experiment * 15)
+
+
 end
 
 to setup
@@ -431,6 +438,7 @@ end
 
 
 to recolor-patch  ;; patch procedure
+
   set pcolor grey + 0.5
   if (floor?)  [ set pcolor grey ]
   if (contamination  > 1)  [ set pcolor blue]
@@ -1152,6 +1160,9 @@ end
 
 
 
+
+
+
 to-report customer-customers-in-queue  ;;customer reporter
 ;report number of customers before customer in queue
   let icustomers-in-queue 0
@@ -1432,11 +1443,15 @@ to-report server-customers-to-jockey
 end
 
 
+
 to-report sco-zone-customers-to-jockey
   let ipxcor sco-zone-xcor
   let ipycor sco-zone-ycor
   report customers with [(server-served-on = nobody) and (xcor >= ( ipxcor - (floor (distance-sco-sco-h / 2)) - jockeying-distance - 1 )) and (xcor <= ( ipxcor + (floor (distance-sco-sco-h / 2)) + jockeying-distance + 1)) and (xcor != ipxcor) ]
 end
+
+
+
 
 
 to sco-servers-service-begin
@@ -1715,6 +1730,8 @@ to cashier-update-satistic [utype]
 
   ]
 
+
+
   if utype = "model-leave" [
     set cashier-working-length cashier-working-length + ( ticks - time-start )
     set cashier-effective-working-length cashier-effective-working-length + ( ticks - time-start - break-length)
@@ -1886,112 +1903,6 @@ to go
     stop
   ]
 end
-
-
-to customer-reneging [reneging-strategy]  ;customer procedure
-
-;  if (reneging-strategy = 0) [customer-reneging-strategy0]
- if (reneging-strategy = 1) [customer-reneging-strategy1]
-;  if (reneging-strategy = 2) [customer-reneging-strategy2]
-;  if (reneging-strategy = 3) [customer-reneging-strategy3]
-;  if (reneging-strategy = 4) [customer-reneging-strategy4]
-end
-
-to customer-reneging-strategy0
-  if random-float 1 < customer-reneging-prob
-  [
-    if server-picked != nobody and current-time - time-entered-queue >= customer-max-waiting-time [
-      die
-    ]
-  ]
-end
-
-to customer-reneging-strategy1
-  let time-for-one 0
-  ask server-picked[
-    set time-for-one next-completion-time
-  ]
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
-      die
-    ]
-  ]
-end
-
-to customer-reneging-strategy2
-  let time-for-one 0
-  ask server-picked[
-    set time-for-one next-completion-time
-  ]
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
-      die
-    ]
-  ]
-end
-
-to customer-reneging-strategy3
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-mean >= customer-max-waiting-time [
-      die
-    ]
-  ]
-end
-
-to customer-reneging-strategy4
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-regression >= customer-max-waiting-time [
-      die
-    ]
-  ]
-end
-
-to customer-balking [balking-strategy]
- if (balking-strategy = 1) [customer-balking-strategy1]
-;  if (balking-strategy = 2) [customer-balking-strategy2]
-;  if (balking-strategy = 3) [customer-balking-strategy3]
-;  if (balking-strategy = 4) [customer-balking-strategy4]
-end
-
-to customer-balking-strategy1
-  if random-float 1 < customer-balking-prob
-  [
-    if customer-customers-in-queue >= max-customer-limit [
-      die
-    ]
-  ]
-end
-
-to customer-balking-strategy2
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-item-number-in-queue / customer-basket-mean-size >= max-customer-limit [
-      die
-    ]
-  ]
-end
-
-to customer-balking-strategy3
-  if random-float 1 < customer-balking-prob
-  [
-    if customer-waiting-time-expected-mean >= max-customer-limit [
-      die
-    ]
-  ]
-end
-
-to customer-balking-strategy4
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-regression >= max-customer-limit [
-      die
-    ]
-  ]
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 -2
@@ -2126,7 +2037,7 @@ customer-cash-payment-rate
 customer-cash-payment-rate
 0
 1
-1.0
+0.2
 0.1
 1
 NIL
@@ -2140,7 +2051,7 @@ CHOOSER
 customer-picking-queue-strategy
 customer-picking-queue-strategy
 0 1 2 3 4 99
-5
+3
 
 TEXTBOX
 5
@@ -2216,7 +2127,7 @@ simulation-end-day
 simulation-end-day
 simulation-start-day
 20
-0.0
+2.0
 1
 1
 NIL
@@ -2399,7 +2310,7 @@ distance-sco-sco-v
 distance-sco-sco-v
 1
 3
-1.0
+2.0
 1
 1
 NIL
@@ -2580,7 +2491,7 @@ cashier-return-time
 cashier-return-time
 0
 5
-4.0
+1.0
 0.5
 1
 NIL
@@ -2868,7 +2779,7 @@ CHOOSER
 server-service-time-model
 server-service-time-model
 "EXPONENTIAL" "Reg. model (POS)"
-0
+1
 
 SLIDER
 135
@@ -2893,7 +2804,7 @@ CHOOSER
 sco-server-service-time-model
 sco-server-service-time-model
 "EXPONENTIAL" "Reg. model (POS)"
-0
+1
 
 SLIDER
 531
@@ -3122,7 +3033,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-arrival-input\\customer-arrival-input-file-store1.csv
+D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-arrival-input-file-store1.csv
 1
 0
 String
@@ -3133,7 +3044,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-basket-payment-input\\customer-basket-payment-input-file-store1.csv
+D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-basket-payment-input-file-store1.csv
 1
 0
 String
@@ -3178,7 +3089,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-arrival-input\\cashier-arrival-input-file-store1.csv
+D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-arrival-input-file-store1.csv
 1
 0
 String
@@ -3206,7 +3117,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-output\\
+D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\
 1
 0
 String
@@ -3234,7 +3145,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-output\\
+D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\
 1
 0
 String
@@ -3279,7 +3190,7 @@ CHOOSER
 customer-jockeying-distance
 customer-jockeying-distance
 0 1 2 3 4 99
-5
+1
 
 CHOOSER
 261
@@ -3290,66 +3201,6 @@ customer-jockeying-threshold
 customer-jockeying-threshold
 1 2 3 4 5 99
 0
-
-SLIDER
-731
-843
-915
-876
-customer-reneging-prob
-customer-reneging-prob
-0
-1
-0.05
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-730
-890
-915
-923
-customer-max-waiting-time
-customer-max-waiting-time
-0
-120
-30.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-941
-844
-1114
-877
-customer-balking-prob
-customer-balking-prob
-0
-5
-0.05
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-943
-890
-1115
-923
-max-customer-limit
-max-customer-limit
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
