@@ -1,5 +1,4 @@
 extensions [time table Csv rngs]
-__includes [ "time-series.nls" ]
 
 breed [cashiers cashier]
 breed [servers server]
@@ -246,7 +245,7 @@ to setup-customer-arrival-data-read
   set customer-arrival-max-rate precision ( customer-arrival-max-rate / 60 ) 2
 
   ;set customer-arrival-input as time series variable from  customer-arrival-input-file
-  set customer-arrival-input ts-load  customer-arrival-input-file
+  set customer-arrival-input time:ts-load  customer-arrival-input-file
 
 end
 
@@ -260,7 +259,7 @@ to setup-customer-basket-payment-data-read
   file-close
 
   ;time series vairable with basket size and mehod of paymant
-  set customer-basket-payment-input ts-load  customer-basket-payment-input-file
+  set customer-basket-payment-input time:ts-load  customer-basket-payment-input-file
 
 end
 
@@ -275,7 +274,7 @@ to setup-cashier-arrival
 
   if (cashier-arrival = "workschedule (POS)") [
    ; set cashier-arrival-input-file "cashier-arrival-input-file-store1.csv"
-    set cashier-arrival-input ts-load cashier-arrival-input-file
+    set cashier-arrival-input time:ts-load cashier-arrival-input-file
   ]
 
 end
@@ -289,26 +288,26 @@ to setup-times
   let end-time1 time:create "9999-12-31 00:00:00"
 
   if customer-arrival-proces = "NHPP (POS)" [
-    set start-time first ts-get customer-arrival-input start-time  "all"
-    set end-time first ts-get customer-arrival-input end-time  "all"]
+    set start-time first time:ts-get customer-arrival-input start-time  "all"
+    set end-time first time:ts-get customer-arrival-input end-time  "all"]
   if (cashier-arrival = "workschedule (POS)") [
-    set start-time1 first ts-get cashier-arrival-input start-time1  "all"
-    set end-time1 first ts-get cashier-arrival-input end-time1  "all"
+    set start-time1 first time:ts-get cashier-arrival-input start-time1  "all"
+    set end-time1 first time:ts-get cashier-arrival-input end-time1  "all"
     set end-time1 time:plus end-time1 cashier-work-time  "minutes"
   ]
 
 
-  if  ( time:is-before? start-time1 start-time and (not time:is-equal? start-time1 time:create "0001-01-01 00:01:00")) or (time:is-equal? start-time  time:create "0001-01-01 00:01:00")[
+  if  ( time:is-before start-time1 start-time and (not time:is-equal start-time1 time:create "0001-01-01 00:01:00")) or (time:is-equal start-time  time:create "0001-01-01 00:01:00")[
 
     set start-time start-time1
   ]
-  if  ( time:is-after? end-time1 end-time  and (not time:is-equal? end-time1 time:create "9999-12-31 00:00:00")) or (time:is-equal? end-time  time:create "9999-12-31 00:00:00") [set end-time end-time1 ]
+  if  ( time:is-after end-time1 end-time  and (not time:is-equal end-time1 time:create "9999-12-31 00:00:00")) or (time:is-equal end-time  time:create "9999-12-31 00:00:00") [set end-time end-time1 ]
 
   set start-time time:plus start-time -1.0 "minutes"
   set start-time1 time:plus start-time1 -1.0 "minutes"
 
-  if time:is-after? (time:plus start-time simulation-start-day "days")  start-time [set start-time (time:plus start-time simulation-start-day "days") ]
-  if time:is-before? (time:plus start-time simulation-end-day "days")  end-time [set end-time (time:plus start-time simulation-end-day "days") ]
+  if time:is-after (time:plus start-time simulation-start-day "days")  start-time [set start-time (time:plus start-time simulation-start-day "days") ]
+  if time:is-before (time:plus start-time simulation-end-day "days")  end-time [set end-time (time:plus start-time simulation-end-day "days") ]
 
   ;set max-run-time
   set max-run-time time:difference-between start-time end-time  "minute"
@@ -537,7 +536,7 @@ to-report customer-arrival-time-schedule-nhpp
   let i_clock current-time
   let i_ticks ticks
   let arrival-next-time ticks
-  while [ abs (( time:difference-between i_clock (item 0 ts-get customer-arrival-input i_clock "all") "minutes" )) > 30 and (time:difference-between i_clock  end-time  "minutes") > 0  ][
+  while [ abs (( time:difference-between i_clock (item 0 time:ts-get customer-arrival-input i_clock "all") "minutes" )) > 30 and (time:difference-between i_clock  end-time  "minutes") > 0  ][
     set i_clock time:plus i_clock 1 "minutes"
     set i_ticks i_ticks + 1
   ]
@@ -568,8 +567,8 @@ to-report customer-arrival-inter-rate-read [time]
 ; this read read interpleted value out transaction count out of POS data file and return it as arrival rate (lambda function value )  for Non-Homogeneous Poisson Process
   let value 0
   carefully
-      [set value  precision ( (ts-get-exac customer-arrival-input time "customer-transaction-count") / 60 ) 2 ]
-      [set value  precision ( (ts-get-interp customer-arrival-input time "customer-transaction-count") / 60 ) 2 ]
+      [set value  precision ( (time:ts-get-exact customer-arrival-input time "\"customer-transaction-count\"") / 60 ) 2 ]
+      [set value  precision ( (time:ts-get-interp customer-arrival-input time "\"customer-transaction-count\"") / 60 ) 2 ]
   report value
 end
 
@@ -619,8 +618,8 @@ end
 to-report basket-payment-ECDF
 ;this reported read ECDF for basket size and payment method  for current time
 ;ECDF is taken out POS data
-  let iDensity (but-first ts-get customer-basket-payment-input  current-time "all" )
-  let iSum (sum  but-first ts-get customer-basket-payment-input current-time "all")
+  let iDensity (but-first time:ts-get customer-basket-payment-input  current-time "all" )
+  let iSum (sum  but-first time:ts-get customer-basket-payment-input current-time "all")
   if iSum > 0 [ set iDensity  map  [ x ->  x / iSum ] iDensity]
   Set iSum 0
   let iECDF []
@@ -1510,7 +1509,7 @@ end
 
 
 to cashiers-store-arrive
-  let line ts-get cashier-arrival-input current-time "all"
+  let line time:ts-get cashier-arrival-input current-time "all"
   if ( time:difference-between first line current-time "minutes") < 300 [
     let inumber-of-cashiers item 1 line
     cashiers-create inumber-of-cashiers cashier-work-time
@@ -1807,11 +1806,11 @@ end
 to-report ts-get-next [ logotimeseries logotime column-name ]
   ;report time series line after logotime
   let i 0
-  let line ts-get logotimeseries logotime column-name
-  let endline ts-get logotimeseries time:create "9999-12-31 00:00:00" column-name
+  let line time:ts-get logotimeseries logotime column-name
+  let endline time:ts-get logotimeseries time:create "9999-12-31 00:00:00" column-name
   while [ (( time:difference-between logotime first line "minutes") <= 0) and line != endline ] [
     set i ( i + 1 )
-    set line ts-get logotimeseries (time:plus logotime i "minutes") column-name
+    set line time:ts-get logotimeseries (time:plus logotime i "minutes") column-name
   ]
   report line
 end
@@ -2127,7 +2126,7 @@ simulation-end-day
 simulation-end-day
 simulation-start-day
 20
-2.0
+18.0
 1
 1
 NIL
@@ -2280,7 +2279,7 @@ distance-server-server
 distance-server-server
 1
 3
-3.0
+2.0
 1
 1
 NIL
@@ -3033,7 +3032,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-arrival-input-file-store1.csv
+C:\\Doktorat\\Models\\Supermarket_Queue_Model\\NetLogo_SupermarketQueueModel\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3044,7 +3043,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-basket-payment-input-file-store1.csv
+C:\\Doktorat\\Models\\Supermarket_Queue_Model\\NetLogo_SupermarketQueueModel\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3089,7 +3088,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-arrival-input-file-store1.csv
+C:\\Doktorat\\Models\\Supermarket_Queue_Model\\NetLogo_SupermarketQueueModel\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3117,7 +3116,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\
+C:\\Doktorat\\Models\\Supermarket_Queue_Model\\NetLogo_SupermarketQueueModel_Output\\customers2\\
 1
 0
 String
@@ -3145,7 +3144,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\
+C:\\Doktorat\\Models\\Supermarket_Queue_Model\\NetLogo_SupermarketQueueModel_Output\\cashiers2\\
 1
 0
 String
@@ -3740,7 +3739,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.0.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

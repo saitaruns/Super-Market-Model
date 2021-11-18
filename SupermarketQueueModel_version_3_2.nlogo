@@ -200,6 +200,8 @@ globals [
   customers-output-file-list
   cashier-output-file-list
 
+  balking-count
+  reneging-count
 ]
 
 to setup-customer-arrival-input-file
@@ -426,6 +428,8 @@ to setup
   setup-times
   setup-customer-data-write
   setup-randomes
+  set reneging-count 0
+  set balking-count 0
   ;print customer-arrival-max-rate
 end
 
@@ -1808,6 +1812,7 @@ to-report cashier-server-close-next-time
     report [time-end] of min-one-of (cashiers with [time-end >= ticks]) [time-end]][
     report 0 ]
 end
+
 to go
   ifelse (ticks < max-run-time) [
 
@@ -1961,10 +1966,10 @@ to customer-balking-strategy
     ]
     if min-customers-in-queue >= max-customer-limit [
       die
+      set balking-count balking-count + 1
     ]
   ]
 end
-
 
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1988,8 +1993,8 @@ GRAPHICS-WINDOW
 20
 -10
 10
-0
-0
+1
+1
 1
 ticks
 50.0
@@ -2003,7 +2008,7 @@ number-of-servers
 number-of-servers
 0
 20
-20.0
+10.0
 1
 1
 NIL
@@ -2190,7 +2195,7 @@ simulation-end-day
 simulation-end-day
 simulation-start-day
 20
-0.0
+18.0
 1
 1
 NIL
@@ -2569,7 +2574,7 @@ cashier-min-line
 cashier-min-line
 0
 5
-1.0
+2.0
 1
 1
 NIL
@@ -3096,7 +3101,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-arrival-input\\customer-arrival-input-file-store1.csv
+C:\\Users\\ADMIN\\OneDrive\\Documents\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3107,7 +3112,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-basket-payment-input\\customer-basket-payment-input-file-store1.csv
+C:\\Users\\ADMIN\\OneDrive\\Documents\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3152,7 +3157,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-arrival-input\\cashier-arrival-input-file-store1.csv
+C:\\Users\\ADMIN\\OneDrive\\Documents\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3180,7 +3185,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\customer-output\\
+C:\\Users\\ADMIN\\OneDrive\\Documents\\ABMS\\Super-Market-Model\\customer-arrival-input\\
 1
 0
 String
@@ -3208,7 +3213,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\Users\\Manoj\\Downloads\\NetLogo-Supermarket-Queue-Model-master\\cashier-output\\
+C:\\Users\\ADMIN\\OneDrive\\Documents\\ABMS\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3274,7 +3279,7 @@ customer-reneging-prob
 customer-reneging-prob
 0
 1
-0.05
+1.0
 0.01
 1
 NIL
@@ -3303,8 +3308,8 @@ SLIDER
 customer-balking-prob
 customer-balking-prob
 0
-5
-0.05
+1
+1.0
 0.01
 1
 NIL
@@ -3319,11 +3324,33 @@ max-customer-limit
 max-customer-limit
 0
 100
-50.0
+3.0
 1
 1
 NIL
 HORIZONTAL
+
+MONITOR
+1264
+439
+1361
+484
+NIL
+reneging-count
+17
+1
+11
+
+MONITOR
+1265
+511
+1352
+556
+NIL
+balking-count
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3863,7 +3890,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
