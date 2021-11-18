@@ -1950,48 +1950,22 @@ to customer-reneging-strategy4
   ]
 end
 
-to customer-balking [balkin-strategy]
- if (reneging-strategy = 1) [customer-reneging-strategy1]
-;  if (reneging-strategy = 2) [customer-reneging-strategy2]
-;  if (reneging-strategy = 3) [customer-reneging-strategy3]
-;  if (reneging-strategy = 4) [customer-reneging-strategy4]
-end
-
-to customer-balking-strategy1
-  if random-float 1 < customer-balking-prob
+to customer-balking-strategy
+ if random-float 1 < customer-balking-prob
   [
-    if customer-customers-in-queue >= max-customer-limit [
+    let min-customers-in-queue count customers
+    ask servers[
+      if length server-queue > 0[
+        set min-customers-in-queue min(list min-customers-in-queue l )
+      ]
+    ]
+    if min-customers-in-queue >= max-customer-limit [
       die
     ]
   ]
 end
 
-to customer-balking-strategy2
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-item-number-in-queue / customer-basket-mean-size >= max-customer-limit [
-      die
-    ]
-  ]
-end
 
-to customer-balking-strategy3
-  if random-float 1 < customer-balking-prob
-  [
-    if customer-waiting-time-expected-mean >= max-customer-limit [
-      die
-    ]
-  ]
-end
-
-to customer-balking-strategy4
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-regression >= max-customer-limit [
-      die
-    ]
-  ]
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 -2
