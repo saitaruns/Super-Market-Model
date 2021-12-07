@@ -13,6 +13,8 @@ patches-own [
 
 
 servers-own [
+  ;covid
+
   customer-being-served
   cashier-working-on
   next-completion-time
@@ -28,6 +30,8 @@ servers-own [
 ]
 
 sco-servers-own [
+  ;covid
+
   customer-being-served
   next-completion-time
   expected-waiting-time
@@ -41,6 +45,8 @@ sco-servers-own [
 ]
 
 cashiers-own [
+  infection-level
+  immunity-level
   server-working-on
   working?
   backoffice?
@@ -57,6 +63,10 @@ cashiers-own [
 ]
 
 customers-own [
+  ;covid
+  infection-level
+  immunity-level
+
   basket-size
 
   ;parameter drawn
@@ -96,6 +106,9 @@ customers-own [
 ]
 
 globals [
+
+  infected-customers
+  infected-cashiers
 
   ticks-hour
   ticks-minute
@@ -186,7 +199,7 @@ globals [
   ;*backoffice list
   cashiers-backoffice
 
-  ;varaiable for simulation of events done discret
+  ;varaiable for simulation of events done discrete
   customer-arrival-next-time
   cashier-arrival-next-time
   cashier-server-enter-next-time
@@ -340,6 +353,7 @@ end
   if number-of-servers > 0 [
     let max-in-row floor ( abs max-pxcor ) / distance-server-server
     create-servers number-of-servers [
+      set contamination 0
       ifelse number-of-servers <= max-in-row [
         setxy (backoffice-width - ( who * distance-server-server ) ) server-ycor
       ][
@@ -382,6 +396,7 @@ to setup-sco-servers
   set sco-zone-queue []
   if number-of-sco-servers > 0 [
     create-sco-servers number-of-sco-servers [
+      set contamination 0
       let sco-server-ycor ((min-pycor + 1) + vertical-interval * ( int ((who - (count servers)) / 2)))
       let sco-server-xcor  backoffice-width + distance-server-server + horizontal-interval * ((who - (count servers)) mod 2)
       setxy sco-server-xcor  sco-server-ycor
@@ -429,34 +444,69 @@ to setup
   setup-randomes
   set balked-customers 0
   set reneging-customers 0
+  set infected-customers 0
   ;print customer-arrival-max-rate
 end
 
+to sanitize
+  ask cashiers [
+    set infection-level 0
+    recolor-cashier
+  ]
+  ask customers [
+    set infection-level 0
+    recolor-customer
+  ]
+  ask patches [
+    set contamination 0
+    recolor-patch
+  ]
+  ask servers [
+    recolor-server
+  ]
+  ask sco-servers [
+    recolor-sco-server
+  ]
+end
+
+to infection-spread
+
+end
 
 to recolor-patch  ;; patch procedure
   set pcolor grey + 0.5
   if (floor?)  [ set pcolor grey ]
-  if (contamination  > 1)  [ set pcolor blue]
-  ;if (contamination  > 1)  [ set pcolor scale-color blue contamination 0.1 25 ]
+  if (contamination  > 1)  [ set pcolor scale-color blue contamination 0.1 25 ]
 end
 
 to recolor-server  ;; server procedure
   if (not open?) [ set color red]
   if (open?)  [ set color green]
-  ;if (customer-being-served != nobody)  [ set color yellow]
+
+  if (contamination  > 1)  [ set color scale-color blue contamination 0.1 25 ]
+
+  if (customer-being-served != nobody)  [ set color yellow]
 end
 
 to recolor-sco-server  ;; sco-server procedure
   if (not open?) [ set color red]
   if (open?)  [ set color green]
+
+  if (contamination  > 1)  [ set color scale-color blue contamination 0.1 25 ]
+
   if (customer-being-served != nobody)  [ set color yellow]
 end
 
 to recolor-cashier  ;; sco-server procedure
-  if (not working?) [ set color white]
+  if (not working?) [ set color green]
   if (working?)  [ set color yellow]
+  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level 0.1 25 ]
 end
 
+to recolor-customer  ;; sco-server procedure
+  set color white
+  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level 0.1 25 ]
+end
 
 to-report customers-output-file
    report (word customer-output-directory "customers-output-file_" customer-picking-queue-strategy "_" customer-jockeying-strategy "_" experiment "_" (remove "." remove ":" remove " " date-and-time) ".csv")
@@ -596,11 +646,13 @@ to customer-store-arrive
       set num-of-servers count (servers with [open?])
       set num-of-sco number-of-sco-servers
 
-      let color-index (customer-arrival-count mod 70)
-      let main-color (floor (color-index / 5))
-      let shade-offset (color-index mod 5)
+      set infection-level 0
+      if random 25 < 10 [
+        set infection-level random-float 10
+      ]
+      set immunity-level random-float 10
+      recolor-customer
 
-      set color (3 + shade-offset + main-color * 10)
       set label precision basket-size 2
       if (payment-method = 1)  [set shape "customer-cash"]
       if (payment-method = 2)  [set shape "customer-card"]
@@ -1017,7 +1069,6 @@ to customer-checkout-queue-join ;;customer procedure
     set sco-zone-queue-picked? FALSE
     set server-picked nobody
     set time-entered-queue ticks
-    customer-reneging
     customer-move-in-queue (length sco-zone-queue) sco-zone-xcor sco-zone-ycor
     set sco-zone-queue (lput self sco-zone-queue)
     sco-servers-service-begin
@@ -1028,7 +1079,6 @@ to customer-checkout-queue-join ;;customer procedure
     set server-picked nobody
     set server-zone-queue-picked? FALSE
     set time-entered-queue ticks
-    customer-reneging
     customer-move-in-queue (length server-zone-queue) server-zone-xcor server-zone-ycor
     set server-zone-queue (lput self server-zone-queue)
     servers-service-begin
@@ -1266,6 +1316,9 @@ end
 to customer-model-leave ;;customer procedure
   set time-leaving-model ticks
   customer-update-output-file
+  if immunity-level < infection-level [
+    set infected-customers infected-customers + 1
+  ]
   customer-update-satistic  "model-leave"
   die
 end
@@ -1516,6 +1569,8 @@ to cashiers-create [quantity time-of-work ]
 ;create cashiers of quantity
 if quantity > 0 [
   create-cashiers quantity [
+     set infection-level 0
+     set immunity-level random-float 10
      set time-start ticks
      set time-end ticks + time-of-work
      set xcor 0
@@ -1687,6 +1742,9 @@ to cashier-model-leave ;cashier procedure
     if (time-break-end > time-break-start) [set break-count  break-count + 1 ]
     cashier-update-output-file-list
     cashier-update-satistic "model-leave"
+    if infection-level > immunity-level [
+      set infected-cashiers infected-cashiers + 1
+    ]
     die
   ]
 end
@@ -1818,6 +1876,7 @@ to-report cashier-server-close-next-time
     report [time-end] of min-one-of (cashiers with [time-end >= ticks]) [time-end]][
     report 0 ]
 end
+
 to go
   ifelse (ticks < max-run-time) [
 
@@ -1899,22 +1958,25 @@ end
 
 
 to customer-reneging ;customer procedure
-  let idraw rngs:rnd-uniform 7 0 1
-  if (idraw <= 0.2) [customer-reneging-strategy0]
-  if (idraw > 0.2 and idraw <= 0.4) [customer-reneging-strategy1]
-  if (idraw > 0.4 and idraw <= 0.6) [customer-reneging-strategy2]
-  if (idraw > 0.6 and idraw <= 0.8) [customer-reneging-strategy3]
-  if (idraw > 0.8 and idraw <= 1.0) [customer-reneging-strategy4]
-
+  ;let idraw rngs:rnd-uniform 7 0 1
+  ;if (idraw <= 0.2) [customer-reneging-strategy0]
+  ;if (idraw > 0.2 and idraw <= 0.4) [customer-reneging-strategy1]
+  ;if (idraw > 0.4 and idraw <= 0.6) [customer-reneging-strategy2]
+  ;if (idraw > 0.6 and idraw <= 0.8) [customer-reneging-strategy3]
+  ;if (idraw > 0.8 and idraw <= 1.0) [customer-reneging-strategy4]
+  customer-reneging-strategy0
 end
 
 to customer-reneging-strategy0
   if random-float 1 < customer-reneging-prob
   [
     if server-queued-on != nobody [
+      let t ticks
+      print(t)
+      print(time-entered-queue)
       if ticks - time-entered-queue >= customer-max-waiting-time[
         set reneging-customers reneging-customers + 1
-        die
+        customer-model-leave
       ]
     ]
   ]
@@ -1929,7 +1991,7 @@ to customer-reneging-strategy1
     if random-float 1 < customer-reneging-prob[
       if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
-        die
+        customer-model-leave
       ]
     ]
   ]
@@ -1944,7 +2006,7 @@ to customer-reneging-strategy2
     if random-float 1 < customer-reneging-prob[
       if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
-        die
+        customer-model-leave
       ]
     ]
   ]
@@ -1955,7 +2017,7 @@ to customer-reneging-strategy3
   [
     if customer-waiting-time-expected-mean >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
-      die
+      customer-model-leave
     ]
   ]
 end
@@ -1965,7 +2027,7 @@ to customer-reneging-strategy4
   [
     if customer-waiting-time-expected-regression >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
-      die
+      customer-model-leave
     ]
   ]
 end
@@ -3115,7 +3177,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3126,7 +3188,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3171,7 +3233,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3199,7 +3261,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-output\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3227,7 +3289,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-output\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3272,7 +3334,7 @@ CHOOSER
 customer-jockeying-distance
 customer-jockeying-distance
 0 1 2 3 4 99
-5
+1
 
 CHOOSER
 261
@@ -3285,10 +3347,10 @@ customer-jockeying-threshold
 0
 
 SLIDER
-731
-843
-915
-876
+710
+827
+882
+860
 customer-reneging-prob
 customer-reneging-prob
 0
@@ -3300,40 +3362,40 @@ NIL
 HORIZONTAL
 
 SLIDER
-708
-892
-935
-925
+711
+875
+882
+908
 customer-max-waiting-time
 customer-max-waiting-time
 0
 120
-1.0
+2.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-941
-844
-1114
-877
+897
+826
+1070
+859
 customer-balking-prob
 customer-balking-prob
 0
 1
-0.0
+0.67
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-943
-890
-1115
-923
+900
+873
+1072
+906
 max-customer-limit
 max-customer-limit
 0
@@ -3345,10 +3407,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1299
-449
-1409
-494
+1250
+540
+1360
+585
 NIL
 balked-customers
 0
@@ -3356,15 +3418,84 @@ balked-customers
 11
 
 MONITOR
-1300
-536
-1423
-581
+1370
+540
+1493
+585
 NIL
 reneging-customers
 0
 1
 11
+
+BUTTON
+471
+17
+544
+50
+NIL
+sanitize
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+1247
+472
+1365
+517
+infected customers
+infected-customers + count customers with [ immunity-level < infection-level ]
+17
+1
+11
+
+MONITOR
+1380
+470
+1488
+515
+infected-cashiers
+infected-cashiers + count cashiers with [ immunity-level < infection-level ]
+0
+1
+11
+
+SLIDER
+710
+947
+882
+980
+infection-spread-rate
+infection-spread-rate
+0
+1
+0.5
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+900
+949
+1072
+982
+infection-growth-rate
+infection-growth-rate
+0
+1
+0.5
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3904,7 +4035,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
