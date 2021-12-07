@@ -199,7 +199,8 @@ globals [
   ;output file list
   customers-output-file-list
   cashier-output-file-list
-
+  balked-customers
+  reneging-customers
 ]
 
 to setup-customer-arrival-input-file
@@ -426,6 +427,8 @@ to setup
   setup-times
   setup-customer-data-write
   setup-randomes
+  set balked-customers 0
+  set reneging-customers 0
   ;print customer-arrival-max-rate
 end
 
@@ -450,8 +453,8 @@ to recolor-sco-server  ;; sco-server procedure
 end
 
 to recolor-cashier  ;; sco-server procedure
-  if (not working?) [ set color red]
-  if (working?)  [ set color green]
+  if (not working?) [ set color white]
+  if (working?)  [ set color yellow]
 end
 
 
@@ -601,7 +604,9 @@ to customer-store-arrive
       set label precision basket-size 2
       if (payment-method = 1)  [set shape "customer-cash"]
       if (payment-method = 2)  [set shape "customer-card"]
+      customer-balking-strategy
       customer-checkout-queue-pick
+
     ]
     if cashier-server-enter-check? [cashier-server-enter-time-schedule]
   ]
@@ -722,8 +727,11 @@ to customer-jockeying-strategy-draw ;customer procedure
 
   ifelse customer-jockeying-strategy = 99 [
     let idraw rngs:rnd-uniform 7 0 1
-    if (idraw <= 0.5)[ set jockeying-strategy 0]
-    if (idraw > 0.5)[ set jockeying-strategy 1] ]
+    if (idraw <= 0.2) [set jockeying-strategy 0]
+    if (idraw > 0.2 and idraw <= 0.4) [set jockeying-strategy 1]
+    if (idraw > 0.4 and idraw <= 0.6) [set jockeying-strategy 2]
+    if (idraw > 0.6 and idraw <= 0.8) [set jockeying-strategy 3]
+    if (idraw > 0.8 and idraw <= 1.0) [set jockeying-strategy 4]]
   [
     set jockeying-strategy customer-jockeying-strategy
   ]
@@ -1009,6 +1017,7 @@ to customer-checkout-queue-join ;;customer procedure
     set sco-zone-queue-picked? FALSE
     set server-picked nobody
     set time-entered-queue ticks
+    customer-reneging
     customer-move-in-queue (length sco-zone-queue) sco-zone-xcor sco-zone-ycor
     set sco-zone-queue (lput self sco-zone-queue)
     sco-servers-service-begin
@@ -1019,6 +1028,7 @@ to customer-checkout-queue-join ;;customer procedure
     set server-picked nobody
     set server-zone-queue-picked? FALSE
     set time-entered-queue ticks
+    customer-reneging
     customer-move-in-queue (length server-zone-queue) server-zone-xcor server-zone-ycor
     set server-zone-queue (lput self server-zone-queue)
     servers-service-begin
@@ -1050,9 +1060,9 @@ end
 to customer-jockey-to-server [iserver]  ;customer procedure
 
  if (jockeying-strategy = 1) [customer-jockey-to-server-strategy1 iserver]
-;  if (jockeying-strategy = 2) [customer-checkout-queue-pick-strategy2]
-;  if (jockeying-strategy = 3) [customer-checkout-queue-pick-strategy3]
-;  if (jockeying-strategy = 4) [customer-checkout-queue-pick-strategy4]
+ if (jockeying-strategy = 2) [customer-checkout-queue-pick-strategy2]
+ if (jockeying-strategy = 3) [customer-checkout-queue-pick-strategy3]
+ if (jockeying-strategy = 4) [customer-checkout-queue-pick-strategy4]
 end
 
 
@@ -1072,9 +1082,9 @@ end
 to customer-jockey-to-sco-zone  ;customer procedure
 
  if (jockeying-strategy = 1) [customer-jockey-to-sco-zone-strategy1]
-;  if (jockeying-strategy = 2) [customer-checkout-queue-pick-strategy2]
-;  if (jockeying-strategy = 3) [customer-checkout-queue-pick-strategy3]
-;  if (jockeying-strategy = 4) [customer-checkout-queue-pick-strategy4]
+ if (jockeying-strategy = 2) [customer-checkout-queue-pick-strategy2]
+ if (jockeying-strategy = 3) [customer-checkout-queue-pick-strategy3]
+ if (jockeying-strategy = 4) [customer-checkout-queue-pick-strategy4]
 end
 
 
@@ -1888,46 +1898,54 @@ to go
 end
 
 
-to customer-reneging [reneging-strategy]  ;customer procedure
+to customer-reneging ;customer procedure
+  let idraw rngs:rnd-uniform 7 0 1
+  if (idraw <= 0.2) [customer-reneging-strategy0]
+  if (idraw > 0.2 and idraw <= 0.4) [customer-reneging-strategy1]
+  if (idraw > 0.4 and idraw <= 0.6) [customer-reneging-strategy2]
+  if (idraw > 0.6 and idraw <= 0.8) [customer-reneging-strategy3]
+  if (idraw > 0.8 and idraw <= 1.0) [customer-reneging-strategy4]
 
-;  if (reneging-strategy = 0) [customer-reneging-strategy0]
- if (reneging-strategy = 1) [customer-reneging-strategy1]
-;  if (reneging-strategy = 2) [customer-reneging-strategy2]
-;  if (reneging-strategy = 3) [customer-reneging-strategy3]
-;  if (reneging-strategy = 4) [customer-reneging-strategy4]
 end
 
 to customer-reneging-strategy0
   if random-float 1 < customer-reneging-prob
   [
-    if server-picked != nobody and current-time - time-entered-queue >= customer-max-waiting-time [
-      die
+    if server-queued-on != nobody [
+      if ticks - time-entered-queue >= customer-max-waiting-time[
+        set reneging-customers reneging-customers + 1
+        die
+      ]
     ]
   ]
 end
 
 to customer-reneging-strategy1
   let time-for-one 0
-  ask server-picked[
-    set time-for-one next-completion-time
-  ]
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
-      die
+  if server-queued-on != nobody[
+    ask server-queued-on[
+      set time-for-one next-completion-time
+    ]
+    if random-float 1 < customer-reneging-prob[
+      if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
+        set reneging-customers reneging-customers + 1
+        die
+      ]
     ]
   ]
 end
 
 to customer-reneging-strategy2
   let time-for-one 0
-  ask server-picked[
-    set time-for-one next-completion-time
-  ]
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
-      die
+  if server-queued-on != nobody[
+    ask server-queued-on[
+      set time-for-one next-completion-time
+    ]
+    if random-float 1 < customer-reneging-prob[
+      if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
+        set reneging-customers reneging-customers + 1
+        die
+      ]
     ]
   ]
 end
@@ -1936,6 +1954,7 @@ to customer-reneging-strategy3
   if random-float 1 < customer-reneging-prob
   [
     if customer-waiting-time-expected-mean >= customer-max-waiting-time [
+      set reneging-customers reneging-customers + 1
       die
     ]
   ]
@@ -1945,6 +1964,7 @@ to customer-reneging-strategy4
   if random-float 1 < customer-reneging-prob
   [
     if customer-waiting-time-expected-regression >= customer-max-waiting-time [
+      set reneging-customers reneging-customers + 1
       die
     ]
   ]
@@ -1960,6 +1980,7 @@ to customer-balking-strategy
       ]
     ]
     if min-customers-in-queue >= max-customer-limit [
+      set balked-customers balked-customers + 1
       die
     ]
   ]
@@ -3094,7 +3115,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store1.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3105,7 +3126,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\Users\\Manoj\\Downloads\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store1.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3150,7 +3171,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\Users\\Manoj\\Downloads\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store1.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3178,7 +3199,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\Users\\Manoj\\Downloads\\Super-Market-Model\\customer-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3206,7 +3227,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\Users\\Manoj\\Downloads\\Super-Market-Model\\cashier-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3272,22 +3293,22 @@ customer-reneging-prob
 customer-reneging-prob
 0
 1
-0.05
+1.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-730
-890
-915
-923
+708
+892
+935
+925
 customer-max-waiting-time
 customer-max-waiting-time
 0
 120
-30.0
+1.0
 1
 1
 NIL
@@ -3301,8 +3322,8 @@ SLIDER
 customer-balking-prob
 customer-balking-prob
 0
-5
-0.05
+1
+0.0
 0.01
 1
 NIL
@@ -3316,12 +3337,34 @@ SLIDER
 max-customer-limit
 max-customer-limit
 0
-100
-50.0
+10
+3.0
 1
 1
 NIL
 HORIZONTAL
+
+MONITOR
+1299
+449
+1409
+494
+NIL
+balked-customers
+0
+1
+11
+
+MONITOR
+1300
+536
+1423
+581
+NIL
+reneging-customers
+0
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
