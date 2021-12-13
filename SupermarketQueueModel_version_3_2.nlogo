@@ -469,8 +469,36 @@ to sanitize
   ]
 end
 
-to infection-spread
+to spread[breed-type]
+  ask breed-type[
+    ifelse infection-level != 0[
+      set infection-level infection-level + infection-level * infection-growth-rate
+      set contamination contamination + infection-level * infection-spread-rate
+    ]
+    [
+      let infected-people turtles with [infection-level != 0] in-radius spread-distance
+      if any? infected-people[
+        let level infection-level
+        ask infected-people [
+          set level level + infection-level * infection-spread-rate
+        ]
+        set infection-level level
+      ]
+      if contamination > 0[
+        set infection-level contamination * infection-spread-rate
+      ]
+    ]
+  ]
+end
 
+to infection-spread
+  spread customers
+  spread cashiers
+  ask patches[
+    if contamination > 0[
+      set contamination contamination - contamination * decay-rate
+    ]
+  ]
 end
 
 to recolor-patch  ;; patch procedure
@@ -1936,6 +1964,7 @@ to go
       set event-queue (fput (list ([next-completion-time] of next-sco-server-to-complete)
                                   "sco-server-complete-service" ([who] of next-sco-server-to-complete)) event-queue)]
 
+    infection-spread
     ;sort list of events according to time
     set event-queue (sort-by [ [ ?1 ?2 ] -> first ?1 < first ?2] event-queue)
     ;print event-queue
@@ -3177,7 +3206,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3188,7 +3217,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3233,7 +3262,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3261,7 +3290,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3289,7 +3318,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-output\\
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3493,6 +3522,36 @@ infection-growth-rate
 1
 0.5
 0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1186
+903
+1358
+936
+spread-distance
+spread-distance
+0
+5
+1.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1184
+861
+1356
+894
+decay-rate
+decay-rate
+0
+1
+0.4
+0.1
 1
 NIL
 HORIZONTAL
@@ -4035,7 +4094,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
