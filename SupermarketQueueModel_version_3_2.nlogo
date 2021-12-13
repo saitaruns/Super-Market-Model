@@ -470,13 +470,13 @@ to sanitize
 end
 
 to spread[breed-type]
-  ask breed-type[
+  ask breed-type with [infection-level < 20][
     ifelse infection-level != 0[
       set infection-level infection-level + infection-level * infection-growth-rate
       set contamination contamination + infection-level * infection-spread-rate
     ]
     [
-      let infected-people turtles with [infection-level != 0] in-radius spread-distance
+      let infected-people (turtle-set customers cashiers) with [infection-level != 0] in-radius spread-distance
       if any? infected-people[
         let level infection-level
         ask infected-people [
@@ -488,6 +488,12 @@ to spread[breed-type]
         set infection-level contamination * infection-spread-rate
       ]
     ]
+    if breed-type = customers[
+      recolor-customer
+    ]
+    if breed-type = cashiers[
+      recolor-cashier
+    ]
   ]
 end
 
@@ -497,43 +503,50 @@ to infection-spread
   ask patches[
     if contamination > 0[
       set contamination contamination - contamination * decay-rate
+      recolor-patch
     ]
+  ]
+  ask servers[
+    recolor-server
+  ]
+  ask sco-servers[
+    recolor-sco-server
   ]
 end
 
 to recolor-patch  ;; patch procedure
   set pcolor grey + 0.5
   if (floor?)  [ set pcolor grey ]
-  if (contamination  > 1)  [ set pcolor scale-color blue contamination 0.1 25 ]
+  if (contamination  > 1)  [ set pcolor scale-color blue contamination -5 45 ]
 end
 
 to recolor-server  ;; server procedure
-  if (not open?) [ set color red]
-  if (open?)  [ set color green]
+  if (not open?) [ set color red ]
+  if (open?)  [ set color green ]
 
-  if (contamination  > 1)  [ set color scale-color blue contamination 0.1 25 ]
+  if (contamination  > 1)  [ set color scale-color blue contamination -5 45 ]
 
-  if (customer-being-served != nobody)  [ set color yellow]
+  if (customer-being-served != nobody)  [ set color yellow ]
 end
 
 to recolor-sco-server  ;; sco-server procedure
   if (not open?) [ set color red]
   if (open?)  [ set color green]
 
-  if (contamination  > 1)  [ set color scale-color blue contamination 0.1 25 ]
+  if (contamination  > 1)  [ set color scale-color blue contamination -5 45 ]
 
-  if (customer-being-served != nobody)  [ set color yellow]
+  if (customer-being-served != nobody)  [ set color yellow ]
 end
 
 to recolor-cashier  ;; sco-server procedure
-  if (not working?) [ set color green]
-  if (working?)  [ set color yellow]
-  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level 0.1 25 ]
+  if (not working?) [ set color green ]
+  if (working?)  [ set color yellow ]
+  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level -5 45 ]
 end
 
 to recolor-customer  ;; sco-server procedure
   set color white
-  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level 0.1 25 ]
+  if (infection-level  > immunity-level)  [ set color scale-color blue infection-level -5 45 ]
 end
 
 to-report customers-output-file
@@ -552,7 +565,9 @@ to move-cashiers-backoffice
 foreach cashiers-backoffice [
     x ->  ask x
     [ ask x [
-
+      if infection-level < immunity-level[
+        set infection-level 0
+      ]
       setxy ( min-pxcor + ((position x cashiers-backoffice) mod backoffice-width))  (min-pycor +  1  +  floor ((position x cashiers-backoffice) / backoffice-width )  )
       ]
     ]
@@ -3206,7 +3221,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3217,7 +3232,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3262,7 +3277,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3290,7 +3305,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output customer\\
 1
 0
 String
@@ -3318,7 +3333,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output cashier\\
 1
 0
 String
