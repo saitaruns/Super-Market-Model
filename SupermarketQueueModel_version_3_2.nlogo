@@ -2020,7 +2020,7 @@ to customer-reneging-strategy0
       if ticks - time-entered-queue >= customer-max-waiting-time[
         set reneging-customers reneging-customers + 1
         ask server-queued-on [
-          set server-queue other (turtle-set myself )
+          set server-queue remove (customer [who] of myself) server-queue
         ]
         die
       ]
@@ -2035,8 +2035,12 @@ to customer-reneging-strategy1
       set time-for-one next-completion-time
     ]
     if random-float 1 < customer-reneging-prob[
+      print(customer-customers-in-queue)
       if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
+        ask server-queued-on [
+          set server-queue remove (customer [who] of myself) server-queue
+        ]
         die
       ]
     ]
@@ -2052,6 +2056,9 @@ to customer-reneging-strategy2
     if random-float 1 < customer-reneging-prob[
       if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
+        ask server-queued-on [
+          set server-queue remove (customer [who] of myself) server-queue
+        ]
         die
       ]
     ]
@@ -2063,6 +2070,9 @@ to customer-reneging-strategy3
   [
     if customer-waiting-time-expected-mean >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
+      ask server-queued-on [
+          set server-queue remove (customer [who] of myself) server-queue
+        ]
       die
     ]
   ]
@@ -2073,6 +2083,9 @@ to customer-reneging-strategy4
   [
     if customer-waiting-time-expected-regression >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
+      ask server-queued-on [
+          set server-queue remove (customer [who] of myself) server-queue
+        ]
       die
     ]
   ]
