@@ -592,6 +592,7 @@ to customer-move-in-queue [queue-position queue-xcor queue-ycor] ;customer proce
   ][
     setxy new-xcor new-ycor
     if (hidden?) [show-turtle]]
+  customer-reneging
   ;customer-contamine
   ;customer-exposure-check
 end
@@ -2016,11 +2017,12 @@ to customer-reneging-strategy0
   [
     if server-queued-on != nobody [
       let t ticks
-      print(t)
-      print(time-entered-queue)
       if ticks - time-entered-queue >= customer-max-waiting-time[
         set reneging-customers reneging-customers + 1
-        customer-model-leave
+        ask server-queued-on [
+          set server-queue other (turtle-set myself )
+        ]
+        die
       ]
     ]
   ]
@@ -2035,7 +2037,7 @@ to customer-reneging-strategy1
     if random-float 1 < customer-reneging-prob[
       if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
-        customer-model-leave
+        die
       ]
     ]
   ]
@@ -2050,7 +2052,7 @@ to customer-reneging-strategy2
     if random-float 1 < customer-reneging-prob[
       if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
         set reneging-customers reneging-customers + 1
-        customer-model-leave
+        die
       ]
     ]
   ]
@@ -2061,7 +2063,7 @@ to customer-reneging-strategy3
   [
     if customer-waiting-time-expected-mean >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
-      customer-model-leave
+      die
     ]
   ]
 end
@@ -2071,7 +2073,7 @@ to customer-reneging-strategy4
   [
     if customer-waiting-time-expected-regression >= customer-max-waiting-time [
       set reneging-customers reneging-customers + 1
-      customer-model-leave
+      die
     ]
   ]
 end
@@ -2285,7 +2287,7 @@ customer-arrival-mean-rate
 customer-arrival-mean-rate
 0
 25
-6.618
+6.616
 0.001
 1
 NIL
@@ -3221,7 +3223,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3232,7 +3234,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3277,7 +3279,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3305,7 +3307,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output customer\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3333,7 +3335,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output cashier\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3414,7 +3416,7 @@ customer-max-waiting-time
 customer-max-waiting-time
 0
 120
-2.0
+4.0
 1
 1
 NIL
@@ -3429,7 +3431,7 @@ customer-balking-prob
 customer-balking-prob
 0
 1
-0.67
+0.11
 0.01
 1
 NIL
@@ -3451,10 +3453,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1250
-540
-1360
-585
+1251
+593
+1361
+638
 NIL
 balked-customers
 0
@@ -3462,10 +3464,10 @@ balked-customers
 11
 
 MONITOR
-1370
-540
-1493
-585
+1369
+592
+1492
+637
 NIL
 reneging-customers
 0
@@ -3492,30 +3494,30 @@ NIL
 MONITOR
 1247
 472
-1365
+1486
 517
-infected customers
-infected-customers + count customers with [ immunity-level < infection-level ]
+infected customers who left supermarket
+infected-customers
 17
 1
 11
 
 MONITOR
-1380
-470
-1488
-515
+1248
+529
+1449
+574
+infected cashiers left supermarket
 infected-cashiers
-infected-cashiers + count cashiers with [ immunity-level < infection-level ]
 0
 1
 11
 
 SLIDER
-710
-947
-882
-980
+1145
+856
+1317
+889
 infection-spread-rate
 infection-spread-rate
 0
@@ -3527,10 +3529,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-900
-949
-1072
-982
+1144
+898
+1316
+931
 infection-growth-rate
 infection-growth-rate
 0
@@ -3542,10 +3544,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1186
-903
-1358
-936
+1330
+858
+1502
+891
 spread-distance
 spread-distance
 0
@@ -3557,10 +3559,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1184
-861
-1356
-894
+1332
+897
+1504
+930
 decay-rate
 decay-rate
 0
@@ -3570,6 +3572,28 @@ decay-rate
 1
 NIL
 HORIZONTAL
+
+MONITOR
+1503
+474
+1752
+519
+infected customers present in supermarket
+count customers with [ immunity-level < infection-level ]
+17
+1
+11
+
+MONITOR
+1503
+528
+1741
+573
+infected cashiers present in supermarket
+count cashiers with [ immunity-level < infection-level ]
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -4109,7 +4133,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
