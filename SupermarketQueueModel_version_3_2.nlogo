@@ -691,9 +691,9 @@ to customer-store-arrive
       set num-of-sco number-of-sco-servers
 
       set infection-level 0
-      ;if random 25 < 10 [
-      ;  set infection-level random-float 10
-      ;]
+      if covid? and random 25 < 10 [
+        set infection-level random-float 10
+      ]
       set immunity-level random-float 10
       recolor-customer
 
@@ -1980,7 +1980,9 @@ to go
       set event-queue (fput (list ([next-completion-time] of next-sco-server-to-complete)
                                   "sco-server-complete-service" ([who] of next-sco-server-to-complete)) event-queue)]
 
-    ;infection-spread
+    if covid? [
+      infection-spread
+    ]
     ;sort list of events according to time
     set event-queue (sort-by [ [ ?1 ?2 ] -> first ?1 < first ?2] event-queue)
     ;print event-queue
@@ -2605,7 +2607,7 @@ cashier-max-line
 cashier-max-line
 1
 5
-2.0
+1.0
 1
 1
 NIL
@@ -3162,7 +3164,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3173,7 +3175,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3218,7 +3220,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3246,7 +3248,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3274,7 +3276,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\
+D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3340,7 +3342,7 @@ customer-reneging-prob
 customer-reneging-prob
 0
 1
-0.2
+0.05
 0.01
 1
 NIL
@@ -3355,7 +3357,7 @@ customer-max-waiting-time
 customer-max-waiting-time
 0
 120
-10.0
+20.0
 1
 1
 NIL
@@ -3370,7 +3372,7 @@ customer-balking-prob
 customer-balking-prob
 0
 1
-0.15
+0.1
 0.01
 1
 NIL
@@ -3385,7 +3387,7 @@ max-customer-limit
 max-customer-limit
 0
 10
-4.0
+5.0
 1
 1
 NIL
@@ -3491,7 +3493,7 @@ spread-distance
 spread-distance
 0
 5
-1.5
+1.0
 0.1
 1
 NIL
@@ -3533,6 +3535,17 @@ count cashiers with [ immunity-level < infection-level ]
 17
 1
 11
+
+SWITCH
+1271
+693
+1374
+726
+covid?
+covid?
+1
+1
+-1000
 
 @#$#@#$#@
 # Modeling the Checkout Process in Supermarkets: Insights for Decision Support in Retail Operations
@@ -4087,7 +4100,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -4754,7 +4767,7 @@ NetLogo 6.2.0
       <value value="2.853"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="covid" repetitions="1" runMetricsEveryStep="true">
+  <experiment name="covid" repetitions="1" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <exitCondition>ticks &gt; 1440</exitCondition>
@@ -4769,38 +4782,11 @@ NetLogo 6.2.0
       <value value="0.2"/>
       <value value="0.3"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="server-service-time-expected">
-      <value value="1.346"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="infection-growth-rate">
       <value value="0.05"/>
       <value value="0.1"/>
       <value value="0.15"/>
       <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-work-time">
-      <value value="240"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-servers">
-      <value value="20"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-distance">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-max-line">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-min-line">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="server-service-time-model">
-      <value value="&quot;EXPONENTIAL&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-proces">
-      <value value="&quot;NHPP (POS)&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-arrival">
-      <value value="&quot;workschedule (POS)&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-reneging-prob">
       <value value="0.05"/>
@@ -4808,110 +4794,26 @@ NetLogo 6.2.0
       <value value="0.15"/>
       <value value="0.2"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-queue-server">
-      <value value="3"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-cashiers">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-sco-sco-v">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-mean-size">
-      <value value="9"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="simulation-end-day">
-      <value value="13"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-payment">
-      <value value="&quot;ECDF (POS)&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sco-server-service-time-model">
-      <value value="&quot;EXPONENTIAL&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max-customers">
-      <value value="500"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-cash-payment-rate">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-server-server">
-      <value value="3"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-payment-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-output-directory">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-mean-rate">
-      <value value="6.616"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-strategy">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="single-queue?">
-      <value value="false"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="customer-balking-prob">
       <value value="0.05"/>
       <value value="0.1"/>
       <value value="0.15"/>
       <value value="0.2"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-in-queue">
-      <value value="1"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="max-customer-limit">
       <value value="3"/>
       <value value="4"/>
       <value value="5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-return-time">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-sco-item-thershold">
-      <value value="92"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="spread-distance">
       <value value="0.5"/>
       <value value="1"/>
       <value value="1.5"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="experiment">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-picking-queue-strategy">
-      <value value="99"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="simulation-start-day">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-sco-servers">
-      <value value="6"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-arrival-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-sco-sco-h">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-threshold">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-output-directory">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\&quot;"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="customer-max-waiting-time">
       <value value="10"/>
       <value value="20"/>
       <value value="30"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sco-server-service-time-expected">
-      <value value="2.853"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="infection-spread-rate">
       <value value="0.05"/>
@@ -4926,89 +4828,11 @@ NetLogo 6.2.0
     <metric>customer-leaving-count</metric>
     <metric>reneging-customers</metric>
     <metric>balked-customers</metric>
-    <enumeratedValueSet variable="decay-rate">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="server-service-time-expected">
-      <value value="1.346"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="infection-growth-rate">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-work-time">
-      <value value="240"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-servers">
-      <value value="20"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-distance">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-max-line">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-min-line">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="server-service-time-model">
-      <value value="&quot;EXPONENTIAL&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-proces">
-      <value value="&quot;NHPP (POS)&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-arrival">
-      <value value="&quot;workschedule (POS)&quot;"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="customer-reneging-prob">
       <value value="0.05"/>
       <value value="0.1"/>
       <value value="0.15"/>
       <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-queue-server">
-      <value value="3"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-cashiers">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-sco-sco-v">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-mean-size">
-      <value value="9"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="simulation-end-day">
-      <value value="13"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-payment">
-      <value value="&quot;ECDF (POS)&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sco-server-service-time-model">
-      <value value="&quot;EXPONENTIAL&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max-customers">
-      <value value="500"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-cash-payment-rate">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-server-server">
-      <value value="3"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-basket-payment-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-output-directory">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-mean-rate">
-      <value value="6.616"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-strategy">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="single-queue?">
-      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-balking-prob">
       <value value="0.05"/>
@@ -5016,60 +4840,15 @@ NetLogo 6.2.0
       <value value="0.15"/>
       <value value="0.2"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-in-queue">
-      <value value="1"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="max-customer-limit">
       <value value="3"/>
       <value value="4"/>
       <value value="5"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-return-time">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-sco-item-thershold">
-      <value value="92"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="spread-distance">
-      <value value="1.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="experiment">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-picking-queue-strategy">
-      <value value="99"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="simulation-start-day">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-arrival-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number-of-sco-servers">
-      <value value="6"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cashier-arrival-input-file">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distance-sco-sco-h">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-jockeying-threshold">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-output-directory">
-      <value value="&quot;C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\&quot;"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="customer-max-waiting-time">
       <value value="10"/>
       <value value="15"/>
       <value value="20"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sco-server-service-time-expected">
-      <value value="2.853"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="infection-spread-rate">
-      <value value="0.1"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
