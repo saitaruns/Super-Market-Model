@@ -3342,7 +3342,7 @@ customer-reneging-prob
 customer-reneging-prob
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -3372,7 +3372,7 @@ customer-balking-prob
 customer-balking-prob
 0
 1
-0.1
+0.0
 0.01
 1
 NIL
@@ -4849,6 +4849,21 @@ NetLogo 6.2.1
       <value value="10"/>
       <value value="15"/>
       <value value="20"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="before covid" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>ticks &gt; 1440</exitCondition>
+    <metric>customer-leaving-count</metric>
+    <enumeratedValueSet variable="customer-reneging-prob">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="covid?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-balking-prob">
+      <value value="0"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
