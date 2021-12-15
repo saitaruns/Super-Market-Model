@@ -3562,6 +3562,8 @@ Customer arrival can be simulated as: HPP (Homogeneous Poisson Process) or NHPP 
 
 Service time can be sampled according to a theoretical (exponential) distribution or designated in a more complex way in several steps. In the second approach: firstly basket-size of each customer is drawn on the basis of empirical (historical data) or theoretical (Poisson) distribution. Secondly service time is calculated as the sum of the transaction and break times separately for service and self-service servers (checkouts). The transaction times are computed according to the power regression model equation just like the break times for self-service. In this regression model the explanatory variable is basket size. The break times for service checkouts – simply randomly sampled.
 
+Infection spread can be simualated using infection level and immunity level parameters for all customer and cashier agents. When ever the infection level is greater than immunity level that particular agent (customer/cashier) will get infected. Agents get infected, also by the contamination level that is on the patch that an agent is present on. The contamination level on every patch is decayed for every tick. Infection level in each agent is increased at a rate given by user.
+
 
 ### Entities, state variables and scales
 
@@ -3687,7 +3689,11 @@ This model uses customer, cashiers, customer basket payment as inputs from their
 
 ## Experiments
 
+We have experimented the simulation 1 time (i.e., for 13 days) without and with the spread of infection,balking,reneging.
+
 ## Results
+
+The results we have got is that the number of customers that the supermarket was able to serve per day has decreaed by a significant amount.
 @#$#@#$#@
 default
 true
@@ -4190,7 +4196,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
