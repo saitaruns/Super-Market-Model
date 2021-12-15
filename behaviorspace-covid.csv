@@ -1,0 +1,49 @@
+BehaviorSpace results (NetLogo 6.2.0),,,,,,,
+SupermarketQueueModel_version_3_2.nlogo,,,,,,,
+covid,,,,,,,
+12/15/2021 21:47:14:298 +0530,,,,,,,
+min-pxcor,max-pxcor,min-pycor,max-pycor,,,,
+-20,20,-10,10,,,,
+[run number],1,1,,,,,
+decay-rate,0.1,,,,,,
+infection-growth-rate,0.05,,,,,,
+customer-jockeying-distance,1,,,,,,
+customer-arrival-proces,NHPP (POS),,,,,,
+cashier-arrival,workschedule (POS),,,,,,
+customer-reneging-prob,0.1,,,,,,
+covid?,TRUE,,,,,,
+simulation-end-day,13,,,,,,
+customer-basket-payment,ECDF (POS),,,,,,
+sco-server-service-time-model,EXPONENTIAL,,,,,,
+customer-balking-prob,0.1,,,,,,
+customer-jockeying-strategy,1,,,,,,
+max-customer-limit,5,,,,,,
+spread-distance,1,,,,,,
+experiment,10,,,,,,
+customer-picking-queue-strategy,99,,,,,,
+simulation-start-day,0,,,,,,
+number-of-sco-servers,6,,,,,,
+customer-max-waiting-time,20,,,,,,
+infection-spread-rate,0.1,,,,,,
+[reporter],customers-per-day,infected-per-day,,,,,
+[final],33094,12260,,,,,
+[min],0,0,,,,,
+[max],33094,12260,,,,,
+[mean],2.72824104,1.035546339,,,,,
+[steps],88250,88250,,,,,
+,,,,,,,
+[all run data],cumulative-customers-per-day,,customers-per-day,,cumulative-infected-per-day,,infected-per-day
+,,,,,,,
+,3370,,3370,,1418,,1418
+,6334,,2964,,2575,,1157
+,9122,,2788,,3660,,1085
+,10928,,1806,,4273,,613
+,13346,,2418,,5146,,873
+,15506,,2160,,5873,,727
+,17577,,2071,,6573,,700
+,20945,,3368,,7967,,1394
+,24015,,3070,,9087,,1120
+,26931,,2916,,10243,,1156
+,28755,,1824,,10804,,561
+,30847,,2092,,11509,,705
+,33094,,2247,,12260,,751
