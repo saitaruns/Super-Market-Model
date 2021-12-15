@@ -2034,6 +2034,24 @@ to customer-balking-strategy
     ]
   ]
 end
+
+to-report customers-per-day
+  ifelse ticks mod 1440 = 0 [
+    report customer-leaving-count
+  ]
+  [
+    report 0
+  ]
+end
+
+to-report infected-per-day
+  ifelse ticks mod 1440 = 0 [
+    report infected-customers + infected-cashiers
+  ]
+  [
+    report 0
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 -2
@@ -3164,7 +3182,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3175,7 +3193,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3220,7 +3238,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3248,7 +3266,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\customer-output\\
 1
 0
 String
@@ -3276,7 +3294,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
+C:\\Users\\Manoj\\OneDrive\\Documents\\UG3\\Super-Market-Model\\cashier-output\\
 1
 0
 String
@@ -3342,7 +3360,7 @@ customer-reneging-prob
 customer-reneging-prob
 0
 1
-0.05
+0.0
 0.01
 1
 NIL
@@ -3372,7 +3390,7 @@ customer-balking-prob
 customer-balking-prob
 0
 1
-0.1
+0.0
 0.01
 1
 NIL
@@ -4100,7 +4118,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -4767,88 +4785,117 @@ NetLogo 6.2.1
       <value value="2.853"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="covid" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="covid" repetitions="1" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <exitCondition>ticks &gt; 1440</exitCondition>
-    <metric>count customers</metric>
-    <metric>count cashiers</metric>
-    <metric>infected-customers</metric>
-    <metric>infected-cashiers</metric>
-    <metric>balked-customers</metric>
-    <metric>reneging-customers</metric>
+    <metric>customers-per-day</metric>
+    <metric>infected-per-day</metric>
     <enumeratedValueSet variable="decay-rate">
       <value value="0.1"/>
-      <value value="0.2"/>
-      <value value="0.3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="infection-growth-rate">
       <value value="0.05"/>
-      <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-jockeying-distance">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-arrival-proces">
+      <value value="&quot;NHPP (POS)&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cashier-arrival">
+      <value value="&quot;workschedule (POS)&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-reneging-prob">
-      <value value="0.05"/>
       <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="covid?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-end-day">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-basket-payment">
+      <value value="&quot;ECDF (POS)&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sco-server-service-time-model">
+      <value value="&quot;EXPONENTIAL&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-balking-prob">
-      <value value="0.05"/>
       <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-jockeying-strategy">
+      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max-customer-limit">
-      <value value="3"/>
-      <value value="4"/>
       <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="spread-distance">
-      <value value="0.5"/>
       <value value="1"/>
-      <value value="1.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="experiment">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-picking-queue-strategy">
+      <value value="99"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-start-day">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number-of-sco-servers">
+      <value value="6"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-max-waiting-time">
-      <value value="10"/>
       <value value="20"/>
-      <value value="30"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="infection-spread-rate">
-      <value value="0.05"/>
       <value value="0.1"/>
-      <value value="0.15"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="balking reneging" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="before covid" repetitions="1" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <exitCondition>ticks &gt; 1440</exitCondition>
-    <metric>customer-leaving-count</metric>
-    <metric>reneging-customers</metric>
-    <metric>balked-customers</metric>
-    <enumeratedValueSet variable="customer-reneging-prob">
+    <metric>customers-per-day</metric>
+    <enumeratedValueSet variable="infection-growth-rate">
       <value value="0.05"/>
-      <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number-of-servers">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="server-service-time-model">
+      <value value="&quot;EXPONENTIAL&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-arrival-proces">
+      <value value="&quot;NHPP (POS)&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cashier-arrival">
+      <value value="&quot;workschedule (POS)&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-reneging-prob">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="covid?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-basket-payment">
+      <value value="&quot;ECDF (POS)&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sco-server-service-time-model">
+      <value value="&quot;EXPONENTIAL&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="customer-balking-prob">
-      <value value="0.05"/>
-      <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
+      <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="max-customer-limit">
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
+    <enumeratedValueSet variable="customer-jockeying-strategy">
+      <value value="1"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="customer-max-waiting-time">
+    <enumeratedValueSet variable="experiment">
       <value value="10"/>
-      <value value="15"/>
-      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="customer-picking-queue-strategy">
+      <value value="99"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number-of-sco-servers">
+      <value value="6"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
