@@ -835,7 +835,7 @@ end
 
 
 to customer-jockeying-distance-draw ;customer procedure
-  ; In this  procedure individual distance between queues for consideration jockeying couuld be assign to each customer. However in our model it's assumed that each customer select the same strategy.
+  ; In this  procedure individual distance between queues for consideration jockeying could be assigned to each customer. However in our model it's assumed that each customer select the same strategy.
   ; Strategy is assign to all customers according to chosen parameter
   ;set jockeying-strategy picking-queue-strategy
   ifelse customer-jockeying-distance = 99 [
@@ -2001,18 +2001,7 @@ to go
   ]
 end
 
-
 to customer-reneging ;customer procedure
-  ;let idraw rngs:rnd-uniform 7 0 1
-  ;if (idraw <= 0.2) [customer-reneging-strategy0]
-  ;if (idraw > 0.2 and idraw <= 0.4) [customer-reneging-strategy1]
-  ;if (idraw > 0.4 and idraw <= 0.6) [customer-reneging-strategy2]
-  ;if (idraw > 0.6 and idraw <= 0.8) [customer-reneging-strategy3]
-  ;if (idraw > 0.8 and idraw <= 1.0) [customer-reneging-strategy4]
-  customer-reneging-strategy0
-end
-
-to customer-reneging-strategy0
   if random-float 1 < customer-reneging-prob
   [
     if server-queued-on != nobody [
@@ -2024,69 +2013,6 @@ to customer-reneging-strategy0
         ]
         die
       ]
-    ]
-  ]
-end
-
-to customer-reneging-strategy1
-  let time-for-one 0
-  if server-queued-on != nobody[
-    ask server-queued-on[
-      set time-for-one next-completion-time
-    ]
-    if random-float 1 < customer-reneging-prob[
-      print(customer-customers-in-queue)
-      if customer-customers-in-queue * time-for-one >= customer-max-waiting-time [
-        set reneging-customers reneging-customers + 1
-        ask server-queued-on [
-          set server-queue remove (customer [who] of myself) server-queue
-        ]
-        die
-      ]
-    ]
-  ]
-end
-
-to customer-reneging-strategy2
-  let time-for-one 0
-  if server-queued-on != nobody[
-    ask server-queued-on[
-      set time-for-one next-completion-time
-    ]
-    if random-float 1 < customer-reneging-prob[
-      if customer-item-number-in-queue / customer-basket-mean-size * time-for-one >= customer-max-waiting-time [
-        set reneging-customers reneging-customers + 1
-        ask server-queued-on [
-          set server-queue remove (customer [who] of myself) server-queue
-        ]
-        die
-      ]
-    ]
-  ]
-end
-
-to customer-reneging-strategy3
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-mean >= customer-max-waiting-time [
-      set reneging-customers reneging-customers + 1
-      ask server-queued-on [
-          set server-queue remove (customer [who] of myself) server-queue
-        ]
-      die
-    ]
-  ]
-end
-
-to customer-reneging-strategy4
-  if random-float 1 < customer-reneging-prob
-  [
-    if customer-waiting-time-expected-regression >= customer-max-waiting-time [
-      set reneging-customers reneging-customers + 1
-      ask server-queued-on [
-          set server-queue remove (customer [who] of myself) server-queue
-        ]
-      die
     ]
   ]
 end
@@ -3236,7 +3162,7 @@ INPUTBOX
 202
 657
 customer-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-arrival-input\\customer-arrival-input-file-store2.csv
 1
 0
 String
@@ -3247,7 +3173,7 @@ INPUTBOX
 202
 712
 customer-basket-payment-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\customer-basket-payment-input\\customer-basket-payment-input-file-store2.csv
 1
 0
 String
@@ -3292,7 +3218,7 @@ INPUTBOX
 600
 655
 cashier-arrival-input-file
-D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\cashier-arrival-input\\cashier-arrival-input-file-store2.csv
 1
 0
 String
@@ -3320,7 +3246,7 @@ INPUTBOX
 203
 775
 customer-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\customer-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output customer\\
 1
 0
 String
@@ -3348,7 +3274,7 @@ INPUTBOX
 604
 771
 cashier-output-directory
-D:\\IIITS\\ABMS\\Super-Market-Model\\cashier-output\\
+C:\\Users\\Sri Charan\\Documents\\prog\\projects\\netlogo\\Super-Market-Model\\output cashier\\
 1
 0
 String
@@ -3609,41 +3535,56 @@ count cashiers with [ immunity-level < infection-level ]
 11
 
 @#$#@#$#@
-## WHAT IS IT?
+# Modeling the Checkout Process in Supermarkets: Insights for Decision Support in Retail Operations
 
-(a general understanding of what the model is trying to show or explain)
+## Overview
 
-## HOW IT WORKS
+### Purpose
 
-(what rules the agents use to create the overall behavior of the model)
+### Patterns
 
-## HOW TO USE IT
+### Entities, state variables and scales
 
-(how to use the model, including a description of each of the items in the Interface tab)
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |
 
-## THINGS TO NOTICE
+### Process overview, scheduling
 
-(suggested things for the user to notice while running the model)
+## Design Concepts
 
-## THINGS TO TRY
+### Basic principle
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+### Emergence
 
-## EXTENDING THE MODEL
+### Adaptation
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+### Objectives
+ 
+### Learning 
 
-## NETLOGO FEATURES
+### Prediction 
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+### Sensing Interaction 
 
-## RELATED MODELS
+### Stochasticity 
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+### Collectives 
 
-## CREDITS AND REFERENCES
+### Observation
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+## Details
+
+### Initialization 
+
+### Input data 
+
+### Submodels
+
+## Experiments
+
+## Results
 @#$#@#$#@
 default
 true
@@ -4146,7 +4087,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
