@@ -3554,46 +3554,136 @@ covid?
 
 ### Purpose
 
+The purpose of the model is to simulate customer decisions of picking a checkout line at a supermarket especially in pandemic times. In particular, we show that when customers pick a line by minimizing the expected waiting time, not only is this choice beneficial for the customers themselves, as it leads to shorter waiting times in queues, but also for the supermarket management, since it yields shorter working times of the cashiers. 
+
 ### Patterns
+
+Customer arrival can be simulated as: HPP (Homogeneous Poisson Process) or NHPP (Nonhomogeneous Poisson Process). In the first case, inter-arrival rates are sampled according to an exponential distribution with a given and constant lambda ( = 1 / arrival rate). In the second case intensity function Lambda(t) is designated as an interpolation between the calibration points which are POS (Point of Sale) transactions counts for each hour of available data. Simulation of NHPP is implemented with a thinning algorithm.
+
+Service time can be sampled according to a theoretical (exponential) distribution or designated in a more complex way in several steps. In the second approach: firstly basket-size of each customer is drawn on the basis of empirical (historical data) or theoretical (Poisson) distribution. Secondly service time is calculated as the sum of the transaction and break times separately for service and self-service servers (checkouts). The transaction times are computed according to the power regression model equation just like the break times for self-service. In this regression model the explanatory variable is basket size. The break times for service checkouts – simply randomly sampled.
+
 
 ### Entities, state variables and scales
 
-| Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph   | Text        |
+![variables](file:./model-images/variables.png)
 
 ### Process overview, scheduling
+
+Each time step ( 1 min ) ,the following processes are processed in the given order.
+The checkout process starts with the collection of articles and arrival to the checkout zone. Next, the customer picks a waiting line. By doing so the customer selects the type of checkout – service or self-service. Note, that in our model each customer is equally likely to select a given checkout type.The next phase includes waiting in line as long as the checkout is busy.In the final step the items are scanned by the cashier (service checkout) or by the customer (self-service checkout) and the payment is made. This stage also includes bagging and idle time between serving the current and the next customer in line. 
+
+#### Customer Arrival to the Checkout Zone
+
+This parameter determine customer arrivals to the system: value "HPP" means Homogeneous Poisson Process with lambda value taken out of "customer-arrival-mean-rate" parameter (lambda = 1/customer-arrival-mean-rate) ; value "NHPP (POS)" means Non-Homogeneous Poisson Process with lambda function determined by calibration points in customer-arrival-input-file-store1.csv input file.
+
+![customer flow chart](file:./model-images/customerFlowchart.png)
+
+#### Availability Of Cashiers 
+
+Based on these logs, the actual cashier availability can be extracted using the following steps: 
+It takes about one minute after a call to move from the back office to the checkout zone. On the other hand, when there are no customers waiting to be served, a cashier is obliged to close the POS and go to the back office. Closing the checkout means that no new customer can enter a particular line. However, a cashier cannot leave the workplace before serving all 
+customers waiting in line.
+
+![cashier flow chart](file:./model-images/cashierFlowchart.png)
+
+
+#### Line Picking Scenarios
+
+It determines the strategy of picking a line by the customer. Followed possibility are available: 
+0 - the line is picked randomly, using a uniform distribution. 
+1 - the line with the lowest number of customers is picked. 
+2 - the line with the lowest number of items in all baskets in this line is picked; 
+3 - the line with the lowest mean service time-implied expected waiting time is picked, i.e. the expected waiting time for each queue is calculated using the number of customers and the mean service time for service and self-service checkouts.
+4 - the line with the lowest power regression-implied expected waiting time is picked, i.e., the expected waiting time for each queue is calculated using the number of customers and the expected service and break times. Value 99 means that it will be sampled out of 0 - 4 according to uniform distribution for every agent customer separately.
+
 
 ## Design Concepts
 
 ### Basic principle
 
+Humans want to reduce the idle time in their day as much as possible.Standing idle in the queue of a supermarket after purchasing all the items we need, is also a case where we can reduce the idle time by choosing the correct and time saving line.The purpose of the study is to find how the customers adapt to the situations in front of them to finish their billing by saving time.
+This model also simulates the queue of a supermarket in the time of a pandemic where people need to maintain a certain distance to decrease the spread of the disease, hence it is useful to find the way where we can complete the billing of each customer in a safe environment.
+
 ### Emergence
+
+The model is expected to change the way customers will pick the line and therefore decrease the time taken before billing. 
+It is also anticpated that this model will prevent the risk of customers getting exposed to others to avoid infection spread atleast upto some extent. 
 
 ### Adaptation
 
+The customers adapt to and switch between the lines to a much smaller line (jockeying) to complete their service faster.
+They also can adapt to the infection rate and not join the line at all if the customer number is high (balking) and they can even leave the line before their service is complete if more than a certain amount of time has passed since they have been standing in the line which will increase the risk of getting exposed (reneging).
+
 ### Objectives
- 
-### Learning 
 
-### Prediction 
+The objective of the customers is to complete their service as early as possible and without getting exposed to others.
 
-### Sensing Interaction 
+### Sensing
+
+Customers sense the number of other customers present in a line and either avoid joining the line to avoid exposure or switch between the lines to decrease the time of service.
+
+### Interaction 
+
+* Direct interactions
+Infected customers spread some of their infection to others(customers and cashiers) with in a particular radius
+* Indirect interactions
+Infected customers leave some of their infection in the patch they are standing. After the next agent standing in the patch gets infected by the infection in that patch.
+If there are no customers, cashiers move back to office. If the customers size increases cashiers come unopened servers to serve the customers
 
 ### Stochasticity 
 
+Stochasticity was incorporated into many processes to account for human instincts.Random functions are used in line picking strategy, jockeying strategy, the will to choose a self service checkout, the will to leave the queue (reneging), the will to not joining the line at all (balking) and also the initial immunity value of a human all include the elements of stochasticity.
+
 ### Collectives 
 
+Set of customers whose immunity level is less than infection level are categorised as infected customers. They spread their infection to other customers cashiers in radius of spread distance.
+Set of cashiers whose immunity level is less than infection level are categorised as infected cashiers. They spread their infection to other customers and cashiers in radius of spread distance.
+
 ### Observation
+
+We have observed that customer served in the times of pandemic drastically decreases and the reneging, balking and jockeying percentages increase due to the pandemic. We collect customer-served customers-reneged and customers-balked and customers and cashiers infected by the disease. They are collected at each days(0-1440 ticks). Customer-served is sampled inorder to show impact of the pandemic. Same is observed in empericial study.
 
 ## Details
 
 ### Initialization 
 
+Customers are not yet near the queue lines,
+Customers are initialized with 
+
+* Basket-size gotten from the input data,
+* Infection-level that varies from 0 to 10,
+* Immunity-level that also varies from 0 to 10,
+* His/her queue-picking-strategy (integer),
+* What server the customer has picked (server-who),
+* His sco-will that is his will of taking a self check out line (true/false), 
+* His threshold for jockeying that is how much queue length is the customer ok with (integer)
+
+Cashiers are present in the back office.
+Cashiers are initialized with what server they are going to work, 
+
+* The start time and end time from input data,
+* Infection-level that varies from 0 to 10 (random),
+* Immunity-level that also varies from 0 to 10 ( random ),
+* Working or not (bool),
+* How many breaks will he take (integer)
+
+20 servers are setup initially with
+
+* Customer bring served on,
+* How much time is taken for that customer,/
+* Server queue that is all the customers list that is corresponding to the server
+* Is the server open or closed? (bool)
+* Start and end time for that server
+
+6 sco-servers are setup initailly with the same parameters as the above 20 servers
+
+Initialization is almost same every time except for the infection level and immunity level which are random values
+
+How many customers and cashiers are present at any given time is taken from the input data, but all the other values are either given by the user or randomized with certain range 
+
 ### Input data 
 
-### Submodels
+This model uses customer, cashiers, customer basket payment as inputs from their respected csv files to represent processes that change over time.
 
 ## Experiments
 
@@ -4100,7 +4190,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
